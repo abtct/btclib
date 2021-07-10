@@ -1,0 +1,8 @@
+{
+    "require": {
+        "denpa/php-bitcoinrpc": "^2.1"
+    },
+    "autoload": {
+        "classmap": ["src/"]
+    }
+}
