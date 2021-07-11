@@ -118,14 +118,12 @@ class BtcLib implements IBtcLib
     /**
      * @inheritDoc
      */
-    public function getBalance(WalletInfo $wallet): float
+    public function getBalance(WalletInfo $wallet, $enoughConfirmations = IBtcLib::DEFAULT_CONFIRMATIONS): float
     {
         $resp = $this
             ->createClient($wallet->rpcwallet)
-            ->getBalance()
+            ->getBalance('*', $enoughConfirmations)
             ->get();
-
-        var_dump(compact('resp'));
 
         return floatval($resp);
     }
@@ -133,9 +131,21 @@ class BtcLib implements IBtcLib
     /**
      * @inheritDoc
      */
-    public function sendTransaction(WalletInfo $from, string $to): string
+    public function createTransaction(WalletInfo $from, string $to, float $amount, bool $feeIsInAmount, $targetConfirmations = IBtcLib::DEFAULT_CONFIRMATIONS, string $estimateMode = 'ECONOMICAL'): string
     {
-        throw new \Exception("TODO");
+        if($from->passphrase) {
+            $this
+                ->createClient($from->rpcwallet)
+                ->walletPassphrase($from->passphrase, 60)
+                ->get();
+        }
+
+        $resp = $this
+            ->createClient($from->rpcwallet)
+            ->sendToAddress($to, $amount, '', '',  $feeIsInAmount, false, $targetConfirmations, $estimateMode)
+            ->get();
+
+        return strval($resp);
     }
 
     /**

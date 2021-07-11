@@ -40,6 +40,9 @@ class TxInfo
      */
     public $fee;
 
+    /** @var bool true - транзакция забыта (не подтверждена и оставлена) */
+    public $abandoned;
+
     public function __construct(array $resp)
     {
         if(isset($resp['details'])) {
@@ -59,7 +62,20 @@ class TxInfo
         return $dt->format(DATE_RFC822);
     }
 
-    public function displayStatus(): string
+    public function displayStatus(int $enoughConfirmations = IBtcLib::DEFAULT_CONFIRMATIONS): string
+    {
+        if($this->abandoned) {
+            return 'Abandoned';
+        }
+
+        if($this->confirmations >= $enoughConfirmations) {
+            return 'Done';
+        }
+
+        return 'Progress';
+    }
+
+    public function displayType(): string
     {
         if($this->category) {
             return ucfirst($this->category);
@@ -70,14 +86,5 @@ class TxInfo
         }
 
         return "Send";
-    }
-
-    public function displayType(): string
-    {
-        if($this->amount < 0) {
-            return 'Send';
-        }
-
-        return 'Receive';
     }
 }

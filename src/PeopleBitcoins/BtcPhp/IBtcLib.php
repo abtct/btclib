@@ -19,6 +19,11 @@ interface IBtcLib
     public static function test(string $host, string $port, string $rpcuser, string $prcpassword);
 
     /**
+     * По умолчанию Bitcoin-клиент считает транзакции достоверными на уровне 6 подтверждений (google)
+     */
+    public const DEFAULT_CONFIRMATIONS = 5;
+
+    /**
      * Получить ОК по синхронизации (true - нода готова к работе)
      *
      * @return bool
@@ -43,19 +48,23 @@ interface IBtcLib
     /**
      * Получить текущий баланс на любом кошельке Bitcoin сети.
      *
-     * @param WalletInfo $wallet    Доступ к кошельку
+     * @param WalletInfo $wallet        Доступ к кошельку
+     * @oaram int $enoughConfirmations  Минимальное количество подтверждений у транзакций на кошельке для подсчета баланса
      * @return float
      */
-    public function getBalance(WalletInfo $wallet): float;
+    public function getBalance(WalletInfo $wallet, $enoughConfirmations = self::DEFAULT_CONFIRMATIONS): float;
 
     /**
      * Перевести средства с кошелька на ноде на любой другой кошелек.
      *
      * @param WalletInfo $from  Доступ к кошельку-донору
      * @param string $to        Адрес кошелька-получателя
+     * @param float $amount
+     * @param bool $feeIsInAmount
+     * @param string $estimateMode
      * @return string           Вернуть Tx - хэш созданной транзакции
      */
-    public function sendTransaction(WalletInfo $from, string $to): string;
+    public function createTransaction(WalletInfo $from, string $to, float $amount, bool $feeIsInAmount, $targetConfirmations = self::DEFAULT_CONFIRMATIONS + 1, string $estimateMode = 'ECONOMICAL'): string;
 
     /**
      * Получит информацию о транзакции/

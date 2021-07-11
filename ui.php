@@ -89,6 +89,16 @@ switch($_POST['act'] ?? '')
         break;
 
     case 'transfer':
+        $w = findwallet($_POST['from'] ?? '', $wallets, $status);
+        if(!$w) {
+            break;
+        }
+
+        $amount = floatval($_POST['amount'] ?? '0');
+        $to = $_POST['to'] ?? '';
+
+        $txid = $btclib->createTransaction($w, $to, $amount, false);
+        $status['flash'] = "Transaction {$txid} created!";
         break;
 
     default:
