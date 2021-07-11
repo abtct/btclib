@@ -60,15 +60,25 @@ interface IBtcLib
     /**
      * Получит информацию о транзакции/
      *
-     * @param string $tx
+     * @param WalletInfo $wallet Доступ к кошельку
+     * @param string $txid
      * @return mixed
      */
-    public function getTxInfo(string $tx): TxInfo;
+    public function getTransactionInfo(WalletInfo $wallet, string $txid): TxInfo;
 
     /**
-     * @param WalletInfo $wallet    доступ к кошельку по которому ищем транзакции
-     * @param int $max      макс. количество
-     * @return []TxInfo     Список транзакций
+     * @param WalletInfo $wallet            доступ к кошельку по которому ищем транзакции
+     * @param int $max                      макс. количество
+     * @param int $skip                     пропустить N транзакций в выоде
+     * @param bool $watchOnlyIncluded       Include transactions to watch-only addresses (see 'importaddress')
+     * @return []TxInfo                     Список транзакций
      */
-    public function getTransactions(WalletInfo $wallet, int $max = 10): iterable;
+    public function getTransactions(WalletInfo $wallet, bool $watchOnlyIncluded = true, int $max = 10, int $skip = 0): iterable;
+
+    /**
+     * @param WalletInfo $wallet            доступ к кошельку получателю транзакции
+     * @param string $txid                  Tx - хэш созданной транзакции
+     * @return string                       Адрес отправителя денег
+     */
+    public function getTransactionSenderAddress(WalletInfo $wallet, string $txid): string;
 }

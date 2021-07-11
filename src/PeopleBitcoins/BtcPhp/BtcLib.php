@@ -32,6 +32,14 @@ class BtcLib implements IBtcLib
         $this->rpcpassword = $rpcpassword;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function nodeId(): string
+    {
+        return $this->host .':'. $this->port;
+    }
+
     protected function createClient(?string $rpcwallet): BitcoinClient
     {
         $url = "http://{$this->rpcuser}:{$this->rpcpassword}@{$this->host}:{$this->port}/";
@@ -133,24 +141,72 @@ class BtcLib implements IBtcLib
     /**
      * @inheritDoc
      */
-    public function getTxInfo(string $tx): TxInfo
+    public function getTransactionInfo( WalletInfo $wallet, string $txid): TxInfo
     {
-        throw new \Exception("TODO");
+        $resp = $this
+            ->createClient($wallet->rpcwallet)
+            ->getTransaction($txid, true)
+            ->get()
+            ['hex'];
+
+        return new TxInfo((array)$resp);
     }
 
     /**
      * @inheritDoc
      */
-    public function getTransactions(WalletInfo $wallet, int $max = 10): iterable
+    public function getTransactions(WalletInfo $wallet, bool $watchOnlyIncluded = true, int $max = 10, int $skip = 0): iterable
     {
-        throw new \Exception("TODO");
+        $resp = $this
+            ->createClient($wallet->rpcwallet)
+            ->listTransactions("*", $max, $skip, $watchOnlyIncluded)
+            ->get();
+
+        if(isset($resp['txid'])) {
+            return [
+                new TxInfo($resp),
+            ];
+        }
+
+        return array_map(function($item) {
+            return new TxInfo((array)$item);
+        }, $resp);
     }
 
     /**
      * @inheritDoc
      */
-    public function nodeId(): string
+    public function getTransactionSenderAddress(WalletInfo $wallet, string $txid): string
     {
-        return $this->host .':'. $this->port;
+        $hex1 = $this
+            ->createClient($wallet->rpcwallet)
+            ->getTransaction($txid, true)
+            ->get()
+        ['hex'];
+
+        $decoded1 = $this
+            ->createClient($wallet->rpcwallet)
+            ->decodeRawTransaction($hex1)
+            ->get();
+
+        $inputs = $decoded1['vin'];
+        $inputTxId = $inputs[0]['txid'];
+        $vout = $inputs[0]['vout'];
+
+        $hex2 = $this
+            ->createClient($wallet->rpcwallet)
+            ->getRawTransaction($inputTxId, true)
+            ->get()
+        ['hex'];
+
+        $decoded2 = $this
+            ->createClient($wallet->rpcwallet)
+            ->decodeRawTransaction($hex2)
+            ->get();
+
+        // TODO: conf: txindex=1
+        // daemon: -reindex=1
+
+        throw new \Exception("TODO");
     }
 }

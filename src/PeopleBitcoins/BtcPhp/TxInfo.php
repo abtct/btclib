@@ -12,35 +12,72 @@ class TxInfo
     /**
      * @var string Tx - хэш транзакции
      */
-    public $tx;
+    public $txid;
 
     /**
-     * @var int Unix-время создания транзакции (или завершения)
+     * @var int Unix-время создания транзакции
      */
-    public $unixtime;
+    public $time;
 
-    /**
-     * @var string Адрес отправителя
-     */
-    public $fromAddress;
+    /** @var int Количество подтверждений транзакции */
+    public $confirmations;
 
     /**
      * @var string Адрес получателя
      */
-    public $toAddress;
+    public $address;
+
+    /** @var string Тип тразакции */
+    public $category;
 
     /**
-     * @var float Сумма перевода (без учета комиссии)
+     * @var float Сумма перевода (без учета комиссии), отрицательная в случае траты
      */
     public $amount;
 
     /**
-     * @var float Сумма коммисии
+     * @var ?float Сумма коммисии
      */
     public $fee;
 
-    /**
-     * @var bool True - транзакция подтверждена (перевод выполнен)
-     */
-    public $complete;
+    public function __construct(array $resp)
+    {
+        if(isset($resp['details'])) {
+            $resp = array_merge($resp, $resp['details']);
+            unset($resp['details']);
+        }
+
+        foreach($resp as $key => $value) {
+            $this->$key = $value;
+        }
+    }
+
+    public function displayTime(): string
+    {
+        $dt = new \DateTime();
+        $dt->setTimestamp($this->time);
+        return $dt->format(DATE_RFC822);
+    }
+
+    public function displayStatus(): string
+    {
+        if($this->category) {
+            return ucfirst($this->category);
+        }
+
+        if($this->amount > 0) {
+            return "Receive";
+        }
+
+        return "Send";
+    }
+
+    public function displayType(): string
+    {
+        if($this->amount < 0) {
+            return 'Send';
+        }
+
+        return 'Receive';
+    }
 }
