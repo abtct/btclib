@@ -8,17 +8,6 @@ interface IBtcLib
     public function nodeId(): string;
 
     /**
-     * Проверить подключение к ноде (JSON-RPC)
-     *
-     * @param string $host
-     * @param string $port
-     * @param string $rpcuser
-     * @param string $prcpassword
-     * @return mixed
-     */
-    public static function test(string $host, string $port, string $rpcuser, string $prcpassword);
-
-    /**
      * По умолчанию Bitcoin-клиент считает транзакции достоверными на уровне 6 подтверждений (google)
      */
     public const DEFAULT_CONFIRMATIONS = 5;

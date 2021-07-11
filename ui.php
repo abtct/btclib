@@ -74,10 +74,15 @@ switch($_POST['act'] ?? '')
         }
 
         $txid = $_POST['txid'];
-        $status['transactions'] = [
-            $btclib->getTransactionInfo($w, $txid)
-        ];
+        if(!$txid) {
+            $status['error'] = 'Empty txid!';
+            break;
+        }
 
+        $tx = $btclib->getTransactionInfo($w, $txid);
+
+        $status['transactions'] = [$tx];
+        $status['single-transaction'] = $tx;
         $status['wallet'] = [
             'name' => $w->rpcwallet,
             'address' => $w->address,
@@ -155,11 +160,6 @@ if($reload) {
 <div class="section">
     <h3>Wallets</h3>
     <form method="post">
-    <p>
-        <button type="submit" name="act" value="create-wallet">
-            Create wallet
-        </button>
-    </p>
 
         <div class="flex-container">
             <?php /** @var WalletInfo $walletInfo */
@@ -171,10 +171,11 @@ if($reload) {
 
         </div>
 
-        <div style="text-align: center; width: 100%;">
-            <input placeholder="Click wallet to see address" type="text" readonly id="wallet_address">
-            <button type="button" onclick="addressCopyClick()">Copy</button>
-        </div>
+        <p>
+            <button type="submit" name="act" value="create-wallet">
+                + Create wallet
+            </button>
+        </p>
     </form>
 </div>
 
@@ -186,20 +187,21 @@ if($reload) {
         <div class="section">
             <label for="info_address">Address</label>
             <input type="text" id="info_address" required name="address" value="<?= $status['wallet']['address'] ?? '' ?>">
+            <button type="button" onclick="addressCopyClick()">Copy</button>
         </div>
 
         <h4>Balance</h4>
-        <p>Showing balance for wallet <strong><?= $status['wallet']['name'] ?? '' ?></strong>, address <code><?= $status['wallet']['address'] ?? 'X' ?></code></p>
-
         <p>
             <button type="submit" name="act" value="info-balance">
                 Load
             </button>
         </p>
-        <p><?= $status['wallet']['balance'] ?? '(balance unknown)' ?></p>
+
+        <p>
+            <?= $status['wallet']['balance'] ?? '' ?>
+        </p>
 
         <h4>Transactions</h4>
-        <p>Showing transactions for wallet <strong><?= $status['wallet']['name'] ?? '' ?></strong>, address <code><?= $status['wallet']['address'] ?? 'X' ?></code></p>
 
         <p>
             <button type="submit" name="act" value="info-transactions">
@@ -207,40 +209,42 @@ if($reload) {
             </button>
         </p>
 
-        <table class="tx-table">
-            <thead>
-            <tr>
-                <th width="200px">Tx</th>
-                <th>Type</th>
-                <th>Time</th>
-                <th>Status</th>
-                <th>Amount</th>
-                <th>Fee</th>
-                <th>Confirmations</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php  /** @var TxInfo $tx */
-            foreach($status['transactions'] ?? [] as $tx): ?>
+        <?php if(isset($status['transactions'])): ?>
+            <table class="tx-table">
+                <thead>
                 <tr>
-                    <td><?= $tx->txid ?></td>
-                    <td><?= $tx->displayType() ?></td>
-                    <td><?= $tx->displayTime() ?></td>
-                    <td><?= $tx->displayStatus() ?></td>
-                    <td><?= abs($tx->amount) ?></td>
-                    <td><?= $tx->fee ?></td>
-                    <td><?= $tx->confirmations ?></td>
+                    <th width="200px">Tx</th>
+                    <th>Type</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                    <th>Fee</th>
+                    <th>Confirmations</th>
                 </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                <?php  /** @var TxInfo $tx */
+                foreach($status['transactions'] ?? [] as $tx): ?>
+                    <tr>
+                        <td><?= $tx->txid ?></td>
+                        <td><?= $tx->displayType() ?></td>
+                        <td><?= $tx->displayTime() ?></td>
+                        <td><?= $tx->displayStatus() ?></td>
+                        <td><?= abs($tx->amount) ?></td>
+                        <td><?= $tx->fee ?></td>
+                        <td><?= $tx->confirmations ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
 
         <div class="section">
 
             <h3>Single transaction</h3>
             <div class="section">
                 <label for="info_txid">Address</label>
-                <input type="text" id="info_txid" name="txid" value="<?= $status['transactions'][0]->txid ?? '' ?>">
+                <input type="text" id="info_txid" name="txid" value="<?= $status['single-transaction']->txid ?? '' ?>">
             </div>
             <p>
                 <button type="submit" name="act" value="info-single-transaction">
@@ -331,11 +335,11 @@ if($reload) {
     })(window, document, navigator);
 
     function addressClick(address) {
-        document.getElementById("wallet_address").value = address
+        document.getElementById("info_address").value = address
     }
 
     function addressCopyClick() {
-        Clipboard.copy(document.getElementById("wallet_address").value)
+        Clipboard.copy(document.getElementById("info_address").value)
     }
 </script>
 

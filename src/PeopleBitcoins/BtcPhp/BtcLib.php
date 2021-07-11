@@ -9,21 +9,6 @@ class BtcLib implements IBtcLib
 {
     protected $rpcuser, $rpcpassword, $host, $port;
 
-    public static function test(string $host, string $port, string $rpcuser, string $rpcpassword)
-    {
-        $bitcoind = new BitcoinClient("http://{$rpcuser}:{$rpcpassword}@{$host}:{$port}/");
-
-        try {
-            $result = $bitcoind->listWallets()->get();
-
-            echo "BtcLib OK";
-        } catch(\Exception $ex) {
-            echo "BtcLib exception: {$ex->getMessage()}";
-            echo PHP_EOL . PHP_EOL . "<br>";
-            echo "rpcuser = {$rpcuser} rpcpassword = **";
-        }
-    }
-
     public function __construct(string $host, string $port, string $rpcuser, string $rpcpassword)
     {
         $this->host = $host;
@@ -44,9 +29,12 @@ class BtcLib implements IBtcLib
     {
         $url = "http://{$this->rpcuser}:{$this->rpcpassword}@{$this->host}:{$this->port}/";
 
-        $c = new FixedRpcClient($url, $rpcwallet);
+        if($rpcwallet) {
+            $c = new BitcoinClient($url);
+            return $c->wallet($rpcwallet);
+        }
 
-        return $c;
+        return new BitcoinClient($url);
     }
 
     protected function random(int $length): string
@@ -156,8 +144,7 @@ class BtcLib implements IBtcLib
         $resp = $this
             ->createClient($wallet->rpcwallet)
             ->getTransaction($txid, true)
-            ->get()
-            ['hex'];
+            ->get();
 
         return new TxInfo((array)$resp);
     }
