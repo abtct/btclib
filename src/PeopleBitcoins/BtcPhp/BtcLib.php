@@ -201,9 +201,33 @@ class BtcLib implements IBtcLib
             ->decodeRawTransaction($hex2)
             ->get();
 
-        // TODO: conf: txindex=1
-        // daemon: -reindex=1
+        var_dump(json_encode(compact('hex1', 'decoded1', 'inputs', 'hex2', 'decoded2')));
 
-        throw new \Exception("TODO");
+        return $hex2;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getTransactionsExtended(WalletInfo $wallet, int $max = 10, int $skip = 0): iterable
+    {
+        $resp = $this
+            ->createClient($wallet->rpcwallet)
+            ->listTransactions("*", $max, $skip, true)
+            ->get();
+
+        $items = [];
+        if(isset($resp['txid'])) {
+            $items[] = new TxInfoExtended($resp);
+        } else {
+            $items = array_map(function($item) {
+                return new TxInfoExtended((array)$item);
+            }, $resp);
+        }
+
+        foreach($items as $item) {
+            $item->loadExtendedData($this, $wallet);
+            yield $item;
+        }
     }
 }

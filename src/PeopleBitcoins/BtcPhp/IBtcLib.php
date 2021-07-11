@@ -22,7 +22,7 @@ interface IBtcLib
     /**
      * Вернуть список аккаунтов (rpcwallets) на этой ноде.
      *
-     * @return []string
+     * @return array []string
      */
     public function getWallets(): array;
 
@@ -37,26 +37,28 @@ interface IBtcLib
     /**
      * Получить текущий баланс на любом кошельке Bitcoin сети.
      *
-     * @param WalletInfo $wallet        Доступ к кошельку
-     * @oaram int $enoughConfirmations  Минимальное количество подтверждений у транзакций на кошельке для подсчета баланса
+     * @param WalletInfo $wallet Доступ к кошельку
+     * @param int $enoughConfirmations
      * @return float
+     * @oaram int $enoughConfirmations  Минимальное количество подтверждений у транзакций на кошельке для подсчета баланса
      */
     public function getBalance(WalletInfo $wallet, $enoughConfirmations = self::DEFAULT_CONFIRMATIONS): float;
 
     /**
      * Перевести средства с кошелька на ноде на любой другой кошелек.
      *
-     * @param WalletInfo $from  Доступ к кошельку-донору
-     * @param string $to        Адрес кошелька-получателя
-     * @param float $amount
-     * @param bool $feeIsInAmount
-     * @param string $estimateMode
-     * @return string           Вернуть Tx - хэш созданной транзакции
+     * @param WalletInfo $from              Доступ к кошельку-донору
+     * @param string $to                    Адрес кошелька-получателя
+     * @param float $amount                 Сумма перевода
+     * @param bool $feeIsInAmount           True - сумма перевода будет уменьшена в пользу коммисии
+     * @param int $targetConfirmations      Целевое количество подтверждений
+     * @param string $estimateMode          Режим расчета комиссии (?)
+     * @return string                       Вернуть Tx - хэш созданной транзакции
      */
     public function createTransaction(WalletInfo $from, string $to, float $amount, bool $feeIsInAmount, $targetConfirmations = self::DEFAULT_CONFIRMATIONS + 1, string $estimateMode = 'ECONOMICAL'): string;
 
     /**
-     * Получит информацию о транзакции/
+     * Получить информацию о транзакции (должна принадлежать кошельку)
      *
      * @param WalletInfo $wallet Доступ к кошельку
      * @param string $txid
@@ -65,6 +67,9 @@ interface IBtcLib
     public function getTransactionInfo(WalletInfo $wallet, string $txid): TxInfo;
 
     /**
+     * Получить список транзакций по кошельку (базовый метод).
+     * Порядок - от старых к новым.
+     *
      * @param WalletInfo $wallet            доступ к кошельку по которому ищем транзакции
      * @param int $max                      макс. количество
      * @param int $skip                     пропустить N транзакций в выоде
@@ -74,9 +79,22 @@ interface IBtcLib
     public function getTransactions(WalletInfo $wallet, bool $watchOnlyIncluded = true, int $max = 10, int $skip = 0): iterable;
 
     /**
+     * Получить для транзакции адрес отправителя.
+     * Возможно при выполнении с аккаунта-получателя указываемой транзакции.
+     *
      * @param WalletInfo $wallet            доступ к кошельку получателю транзакции
      * @param string $txid                  Tx - хэш созданной транзакции
      * @return string                       Адрес отправителя денег
      */
     public function getTransactionSenderAddress(WalletInfo $wallet, string $txid): string;
+
+    /**
+     * Получить список транзакций с расширенной информацией (адреса отправителей)
+     *
+     * @param WalletInfo $wallet
+     * @param int $max
+     * @param int $skip
+     * @return iterable|[]TxInfoExtended
+     */
+    public function getTransactionsExtended(WalletInfo $wallet, int $max = 10, int $skip = 0): iterable;
 }

@@ -23,7 +23,7 @@ class TxInfo
     public $confirmations;
 
     /**
-     * @var string Адрес получателя
+     * @var string Адрес получателя транзакции
      */
     public $address;
 
@@ -43,6 +43,12 @@ class TxInfo
     /** @var bool true - транзакция забыта (не подтверждена и оставлена) */
     public $abandoned;
 
+    /**
+     * Загрузить значения полей из массива декодированной HEX транзакции.
+     *
+     * @param IBtcLib $btclib
+     * @param array $resp
+     */
     public function __construct(array $resp)
     {
         if(isset($resp['details'])) {
@@ -55,6 +61,11 @@ class TxInfo
         }
     }
 
+    /**
+     * Человекочитаемое время транзакции
+     *
+     * @return string
+     */
     public function displayTime(): string
     {
         $dt = new \DateTime();
@@ -62,6 +73,12 @@ class TxInfo
         return $dt->format(DATE_RFC822);
     }
 
+    /**
+     * Отобразить статус (Abandoned/OK/Progress)
+     *
+     * @param int $enoughConfirmations
+     * @return string
+     */
     public function displayStatus(int $enoughConfirmations = IBtcLib::DEFAULT_CONFIRMATIONS): string
     {
         if($this->abandoned) {
@@ -69,12 +86,17 @@ class TxInfo
         }
 
         if($this->confirmations >= $enoughConfirmations) {
-            return 'Done';
+            return 'OK';
         }
 
         return 'Progress';
     }
 
+    /**
+     * Вид транзакции относительно кошелька (Send/Receive)
+     *
+     * @return string
+     */
     public function displayType(): string
     {
         if($this->category) {
@@ -86,5 +108,15 @@ class TxInfo
         }
 
         return "Send";
+    }
+
+    /**
+     * Проверить, что тип транзакции - получение денег от кого-то еще.
+     *
+     * @return bool
+     */
+    public function isReceive(): bool
+    {
+        return $this->displayType() == 'Receive';
     }
 }

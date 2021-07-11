@@ -5,6 +5,7 @@
 use PeopleBitcoins\BtcPhp\BtcLib;
 use PeopleBitcoins\BtcPhp\IBtcLib;
 use PeopleBitcoins\BtcPhp\TxInfo;
+use PeopleBitcoins\BtcPhp\TxInfoExtended;
 use PeopleBitcoins\BtcPhp\WalletInfo;
 
 const LABEL_WALLETS = "wallets_for_clients";
@@ -95,7 +96,7 @@ switch($_POST['act'] ?? '')
             break;
         }
 
-        $status['transactions'] = $btclib->getTransactions($w, 50);
+        $status['transactions'] = $btclib->getTransactionsExtended($w, 50);
         $status['wallet'] = [
             'name' => $w->rpcwallet,
             'address' => $w->address,
@@ -215,6 +216,7 @@ if($reload) {
                 <tr>
                     <th width="200px">Tx</th>
                     <th>Type</th>
+                    <th>Sender</th>
                     <th>Time</th>
                     <th>Status</th>
                     <th>Amount</th>
@@ -223,11 +225,14 @@ if($reload) {
                 </tr>
                 </thead>
                 <tbody>
-                <?php  /** @var TxInfo $tx */
-                foreach($status['transactions'] ?? [] as $tx): ?>
+                <?php  /** @var TxInfoExtended $tx */
+                foreach($status['transactions'] ?? [] as $tx):
+                    $w = findwallet($tx->address, $wallets, $status);
+                    ?>
                     <tr>
                         <td><?= $tx->txid ?></td>
                         <td><?= $tx->displayType() ?></td>
+                        <td><?= $tx->senderAddress ?></td>
                         <td><?= $tx->displayTime() ?></td>
                         <td><?= $tx->displayStatus() ?></td>
                         <td><?= abs($tx->amount) ?></td>
