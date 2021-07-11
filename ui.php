@@ -2,9 +2,7 @@
 
 /** @var IBtcLib $btclib */
 
-use PeopleBitcoins\BtcPhp\BtcLib;
 use PeopleBitcoins\BtcPhp\IBtcLib;
-use PeopleBitcoins\BtcPhp\TxInfo;
 use PeopleBitcoins\BtcPhp\TxInfoExtended;
 use PeopleBitcoins\BtcPhp\WalletInfo;
 
@@ -145,7 +143,7 @@ if($reload) {
 
 <html>
 <head>
-    <title>Test UI</title>
+    <title>Sync: <?= round($btclib->verificationProgress() * 100, 3) ?>%</title>
     <link type="text/css" rel="stylesheet" href="ui.css">
 </head>
 <body>

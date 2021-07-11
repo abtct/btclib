@@ -92,9 +92,9 @@ interface IBtcLib
      *
      * @param WalletInfo $wallet            доступ к кошельку получателю транзакции
      * @param string $txid                  Tx - хэш созданной транзакции
-     * @return string                       Адрес отправителя денег
+     * @return string|null                       Адрес отправителя денег
      */
-    public function getTransactionSenderAddress(WalletInfo $wallet, string $txid): string;
+    public function getTransactionSenderAddress(WalletInfo $wallet, string $txid): ?string;
 
     /**
      * Получить список транзакций с расширенной информацией (адреса отправителей)

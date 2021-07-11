@@ -23,10 +23,6 @@ final class TxInfoExtended extends TxInfo
      */
     public function loadExtendedData(IBtcLib $btclib, WalletInfo $wallet)
     {
-        if($this->senderAddress) {
-            return true;
-        }
-
         if(!$this->txid) {
             return false;
         }

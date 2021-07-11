@@ -4,6 +4,7 @@ namespace PeopleBitcoins\BtcPhp;
 
 use Denpa\Bitcoin\Client as BitcoinClient;
 use Denpa\Bitcoin\Config;
+use Denpa\Bitcoin\Exceptions\BadRemoteCallException;
 use Denpa\Bitcoin\Exceptions\ClientException;
 
 class BtcLib implements IBtcLib
@@ -200,8 +201,12 @@ class BtcLib implements IBtcLib
 
     /**
      * @inheritDoc
+     *
+     * Credits to cryptean in C#
+     *
+     * @see https://github.com/cryptean/bitcoinlib/blob/master/src/BitcoinLib/Services/RpcServices/RpcExtenderService/RpcExtenderService.cs#L160
      */
-    public function getTransactionSenderAddress(WalletInfo $wallet, string $txid): string
+    public function getTransactionSenderAddress(WalletInfo $wallet, string $txid): ?string
     {
         $hex1 = $this
             ->createClient($wallet->rpcwallet)
@@ -216,22 +221,29 @@ class BtcLib implements IBtcLib
 
         $inputs = $decoded1['vin'];
         $inputTxId = $inputs[0]['txid'];
-        $vout = $inputs[0]['vout'];
 
-        $hex2 = $this
-            ->createClient($wallet->rpcwallet)
-            ->getRawTransaction($inputTxId, true)
-            ->get()
-        ['hex'];
+        try {
+            $hex2 = $this
+                ->createClient($wallet->rpcwallet)
+                ->getRawTransaction($inputTxId, true)
+                ->get()
+            ['hex'];
+        } catch(BadRemoteCallException $ex) {
+            // Case 1: Blockchain transactions are still in the process of being indexed.
+            // Case 2: txindex is 0 (bitcoin.conf)
+            if(stripos($ex->getMessage(), 'Invalid or non-wallet transaction') === 0) {
+                return null;
+            }
+        }
 
         $decoded2 = $this
             ->createClient($wallet->rpcwallet)
             ->decodeRawTransaction($hex2)
             ->get();
 
-        var_dump(json_encode(compact('hex1', 'decoded1', 'inputs', 'hex2', 'decoded2')));
+        $outputs = $decoded2['vout'];
 
-        return $hex2;
+        return $outputs[0]['scriptPubKey']['addresses'][0] ?? null;
     }
 
     /**

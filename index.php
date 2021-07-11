@@ -8,6 +8,10 @@ error_reporting(E_ALL);
 // Подключение namespace BtcPhp
 require "vendor/autoload.php";
 
+// BUG??
+require_once __DIR__.'/src/PeopleBitcoins/BtcPhp/TxInfo.php';
+require_once __DIR__.'/src/PeopleBitcoins/BtcPhp/TxInfoExtended.php';
+
 use PeopleBitcoins\BtcPhp\BtcLib;
 
 if(!file_exists('config.json')) {
