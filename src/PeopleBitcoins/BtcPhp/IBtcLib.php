@@ -68,11 +68,12 @@ interface IBtcLib
     /**
      * Получить информацию о транзакции (должна принадлежать кошельку)
      *
-     * @param WalletInfo $wallet Доступ к кошельку
-     * @param string $txid
+     * @param WalletInfo $wallet        Доступ к кошельку
+     * @param string $txid              Tx - хэш транзакции
+     * @param bool $tryExtendedInfo     По возможности вернуть расширенную информацию
      * @return mixed
      */
-    public function getTransactionInfo(WalletInfo $wallet, string $txid): TxInfo;
+    public function getTransactionInfo(WalletInfo $wallet, string $txid, bool $tryExtendedInfo = true): TxInfo;
 
     /**
      * Получить список транзакций по кошельку (базовый метод).

@@ -168,14 +168,21 @@ class BtcLib implements IBtcLib
     /**
      * @inheritDoc
      */
-    public function getTransactionInfo( WalletInfo $wallet, string $txid): TxInfo
+    public function getTransactionInfo(WalletInfo $wallet, string $txid, bool $tryExtendedInfo = true): TxInfo
     {
         $resp = $this
             ->createClient($wallet->rpcwallet)
             ->getTransaction($txid, true)
             ->get();
 
-        return new TxInfo((array)$resp);
+        $result = new TxInfo((array)$resp);
+
+        if($result->isReceive()) {
+            $result = new TxInfoExtended($resp);
+            $result->loadExtendedData($this, $wallet);
+        }
+
+        return $result;
     }
 
     /**

@@ -78,7 +78,7 @@ switch($_POST['act'] ?? '')
             break;
         }
 
-        $tx = $btclib->getTransactionInfo($w, $txid);
+        $tx = $btclib->getTransactionInfo($w, $txid, true);
 
         $status['transactions'] = [$tx];
         $status['single-transaction'] = $tx;
@@ -214,7 +214,8 @@ if($reload) {
                 <tr>
                     <th width="200px">Tx</th>
                     <th>Type</th>
-                    <th>Sender</th>
+                    <th>From</th>
+                    <th>To</th>
                     <th>Time</th>
                     <th>Status</th>
                     <th>Amount</th>
@@ -230,7 +231,22 @@ if($reload) {
                     <tr>
                         <td><?= $tx->txid ?></td>
                         <td><?= $tx->displayType() ?></td>
-                        <td><?= $tx->senderAddress ?></td>
+                        <td>
+                            <!-- Адрес отправителя: TxInfo::$senderAddress (использовать только при isReceive() -->
+                            <?php if($tx->isReceive()): ?>
+                                <?= $tx->senderAddress ?>
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <!-- Адрес получателя: TxInfo::$address отображаем только для переводов в чужую сторону -->
+                            <?php if(!$tx->isReceive()): ?>
+                                <?= $tx->address ?>
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </td>
                         <td><?= $tx->displayTime() ?></td>
                         <td><?= $tx->displayStatus() ?></td>
                         <td><?= abs($tx->amount) ?></td>
