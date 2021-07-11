@@ -1,6 +1,7 @@
 {
     "require": {
-        "denpa/php-bitcoinrpc": "^2.1"
+        "denpa/php-bitcoinrpc": "^2.1",
+        "ext-json": "*"
     },
     "autoload": {
         "classmap": ["src/"]
