@@ -77,6 +77,11 @@ switch($_POST['act'] ?? '')
         $status['transactions'] = [
             $btclib->getTransactionInfo($w, $txid)
         ];
+
+        $status['wallet'] = [
+            'name' => $w->rpcwallet,
+            'address' => $w->address,
+        ];
         break;
 
     case 'info-transactions':
@@ -86,6 +91,11 @@ switch($_POST['act'] ?? '')
         }
 
         $status['transactions'] = $btclib->getTransactions($w, 50);
+        $status['wallet'] = [
+            'name' => $w->rpcwallet,
+            'address' => $w->address,
+        ];
+
         break;
 
     case 'transfer':
@@ -97,8 +107,18 @@ switch($_POST['act'] ?? '')
         $amount = floatval($_POST['amount'] ?? '0');
         $to = $_POST['to'] ?? '';
 
+        if($amount == 0) {
+            $status['error'] = "Cannot send 0 BTC";
+            break;
+        }
+
+        if(!$to) {
+            $status['error'] = "No receiver address";
+            break;
+        }
+
         $txid = $btclib->createTransaction($w, $to, $amount, false);
-        $status['flash'] = "Transaction {$txid} created!";
+        $status['flash'] = "Transaction created: {$txid}";
         break;
 
     default:

@@ -11,14 +11,13 @@ use PeopleBitcoins\BtcPhp\WalletInfo;
 
 require_once(__DIR__.'/src/PeopleBitcoins/BtcPhp/WalletInfo.php');
 
-$config = [
-    'host' => '127.0.0.1',
-    'port' => '18332',
-    'rpcuser'     => 'people_bitcoins',
-    'rpcpassword' => 'MW6EJqKCWe',
-];
+if(file_exists('config.json')) {
+    $config = json_decode(file_get_contents('config.json'), true);
+} else {
+    throw new Exception("No config file on disk");
+}
 
-function is_cli()
+function isPhpCli()
 {
     return php_sapi_name() === 'cli';
 }
@@ -32,10 +31,6 @@ function testtcp($host, $port)
     echo "<p>Connection $port OK</p>";
       fclose($fp);
   }
-}
-
-if(is_cli()) {
-    $config['host'] = '127.0.0.1';
 }
 
 testtcp($config['host'],8333);
@@ -62,9 +57,9 @@ $btclib = new BtcLib(
     $config['rpcpassword']
 );
 
-require __DIR__ . '/ui.php';
+if(!isPhpCli()) {
 
-if(!is_cli()) {
+    require __DIR__ . '/ui.php';
 
     echo "<br>";
 
