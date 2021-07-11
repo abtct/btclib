@@ -4,20 +4,28 @@ namespace PeopleBitcoins\BtcPhp;
 
 interface IBtcLib
 {
-    /** Уникальный идентификатор ноды, с которой происходит подключение */
-    public function nodeId(): string;
-
     /**
      * По умолчанию Bitcoin-клиент считает транзакции достоверными на уровне 6 подтверждений (google)
      */
     public const DEFAULT_CONFIRMATIONS = 5;
 
+    /** Уникальный идентификатор ноды, с которой происходит подключение */
+    public function nodeId(): string;
+
     /**
-     * Получить ОК по синхронизации (true - нода готова к работе)
+     * Попытка выполнить вызов getblockchaininfo и прочитать степень синхронизации ноды в процентах (от 0 до 1)
      *
-     * @return bool
+     * @return float
      */
-    public function isReady(): bool;
+    public function verificationProgress(): float;
+
+    /**
+     * Возвращает строку с описанием причины, по которой работать с нодой в данный момент нельзя.
+     * Или null, если все ок.
+     *
+     * @return string|null
+     */
+    public function statusError(): ?string;
 
     /**
      * Вернуть список аккаунтов (rpcwallets) на этой ноде.

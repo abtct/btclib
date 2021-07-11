@@ -18,8 +18,7 @@ if(!file_exists('config.json')) {
 $config = json_decode(file_get_contents('config.json'), true);
 
 // Клиент для работы с нодой (настройки из нашего конфига)
-$btclib = new BtcLib($config['host'], $config['port'], $config['rpcuser'], $config['rpcpassword']
-);
+$btclib = new BtcLib($config['host'], $config['port'], $config['rpcuser'], $config['rpcpassword']);
 
 // Проверить, если код выполняется в консоли
 function isPhpCli()
@@ -27,8 +26,12 @@ function isPhpCli()
     return php_sapi_name() === 'cli';
 }
 
-// HTML выводим только для браузера
-if(!isPhpCli()) {
+$errstr = $btclib->statusError();
+
+if($errstr) {                           // Ошибка состояния ноды
+    echo "BtcLib not ready - $errstr";
+    echo "<br>" . PHP_EOL . PHP_EOL;
+} else if(!isPhpCli()) {                // HTML выводим только для браузера
     require __DIR__ . '/ui.php';
     echo "<br>" . PHP_EOL . PHP_EOL;
 }

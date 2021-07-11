@@ -4,6 +4,7 @@ namespace PeopleBitcoins\BtcPhp;
 
 use Denpa\Bitcoin\Client as BitcoinClient;
 use Denpa\Bitcoin\Config;
+use Denpa\Bitcoin\Exceptions\ClientException;
 
 class BtcLib implements IBtcLib
 {
@@ -51,15 +52,42 @@ class BtcLib implements IBtcLib
     /**
      * @inheritDoc
      */
-    public function isReady(): bool
+    public function verificationProgress(): float
+    {
+        $resp = $this
+            ->createClient(null)
+            ->getBlockchainInfo()
+            ->get();
+
+        $key = 'verificationprogress';
+
+        if(isset($resp[$key])) {
+            return floatval($resp[$key]);
+        }
+
+        $keys = join(', ', array_keys($resp));
+        throw new \Exception("No key {$key} in response to getblockchaininfo. Returned keys are: " . $keys);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function statusError(): ?string
     {
         try {
-            self::test($this->host, $this->port, $this->rpcuser, $this->rpcpassword);
-            // todo: check block number in sync
-            return true;
-        } catch (\Exception $_) {}
+            $syncProgress = $this->verificationProgress();
+            $syncProgress *= 100;
 
-        return false;
+            if($syncProgress < 90) {
+                return "blockchain syncing at {$syncProgress}%";
+            }
+        } catch(\Denpa\Bitcoin\Exceptions\BadRemoteCallException $ex) {
+            return "error getting verificationProgress from node: {$ex->getMessage()}";
+        } catch (\GuzzleHttp\Exception\ConnectException $_) {
+            return "connect failed";
+        }
+
+        return null;
     }
 
     /**
