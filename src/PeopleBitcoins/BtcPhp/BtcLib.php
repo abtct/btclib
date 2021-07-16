@@ -7,6 +7,10 @@ use Denpa\Bitcoin\Config;
 use Denpa\Bitcoin\Exceptions\BadRemoteCallException;
 use Denpa\Bitcoin\Exceptions\ClientException;
 
+// TODO: Check that 'confirmations' field is always initialized in TxInfo after these methods,
+// Conditions for 'confirmations' field:
+// https://bitcoin.stackexchange.com/questions/30878/how-to-get-the-number-of-the-confirmed-transactions-from-bitcoin-qt-rpc
+
 class BtcLib implements IBtcLib
 {
     protected $rpcuser, $rpcpassword, $host, $port;

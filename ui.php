@@ -8,11 +8,12 @@ use PeopleBitcoins\BtcPhp\WalletInfo;
 
 const LABEL_WALLETS = "wallets_for_clients";
 
-$FILE_WALLETS = ".wallets.{$btclib->nodeId()}.dat";
+$FILE_WALLETS = $_SERVER['DOCUMENT_ROOT'] . "/.wallets.{$btclib->nodeId()}.dat";
 
 /** @var []WalletInfo $wallets */
 if(file_exists($FILE_WALLETS)) {
     $wallets = unserialize(file_get_contents($FILE_WALLETS));
+    file_put_contents("{$FILE_WALLETS}.json", json_encode($wallets));//copy as json array
 } else {
     $wallets = [];
 }
