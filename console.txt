@@ -1,0 +1,31 @@
+docker run -d -it \
+  --net host \
+  --name bitcoind \
+  ruimarinho/bitcoin-core \
+  -printtoconsole \
+  -testnet=1 \
+  -rpcallowip=127.0.0.1 \
+  -rpcbind=0.0.0.0 \
+  -rpcuser=people_bitcoins \
+  -rpcpassword=MW6EJqKCWe
+
+docker logs -f bitcoind
+
+docker exec -it bitcoind curl --data-binary '{"jsonrpc":"1.0","id":"1","method":"getnetworkinfo","params":[]}' http://people_bitcoins:MW6EJqKCWe@work.people-bitcoins.ru:18332/
+
+docker exec -it bitcoind curl --data-binary '{"jsonrpc":"1.0","id":"1","method":"addnode","params":["testnet-seed.bluematt.me", "add"]}' http://people_bitcoins:MW6EJqKCWe@127.0.0.1:18332/ 
+
+docker exec -it bitcoind curl --data-binary '{"jsonrpc":"1.0","id":"1","method":"addnode","params":["69.59.19.23", "add"]}' http://people_bitcoins:MW6EJqKCWe@127.0.0.1:18332/ 
+
+
+docker exec -it bitcoind curl --data-binary '{"jsonrpc":"1.0","id":"1","method":"addnode","params":["69.59.19.23", "add"]}' http://people_bitcoins:MW6EJqKCWe@127.0.0.1:18332/ 
+
+docker exec -it bitcoind curl --request POST 'https://btc.getblock.io/testnet/' --header 'x-api-key: 911514fc-c73f-475d-8e49-7a3b839f1e16' --header 'Content-Type: application/json' --data-binary '{"jsonrpc":"1.0","id":"1","method":"getnetworkinfo","params":[]}'
+
+
+
+
+{"resp":{"amount":0.001,"confirmations":2,"blockhash":"000000000000006e917ed2309e386c4e9b4add16ba5f604f2bdcbec711fb8fd8","blockheight":2032806,"blockindex":23,"blocktime":1625993925,"txid":"5c67257d6efa280ad3115ef131574c6701f1083113e1c6464507dbd83f332e65","walletconflicts":[],"time":1625993925,"timereceived":1625993979,"bip125-replaceable":"no","details":[{"address":"tb1qqs3x502z4jscqt8qws4xw6njjc7248c8sq75h3","category":"receive","amount":0.001,"label":"","vout":1}],"hex":"02000000000101bb731caebd7bb227719a672ca96ec4f3ef38d3cbaf53e0c25bc739073572b9650000000000feffffff02dd18810000000000160014f9e68761bd8082fcd9421cf73e535ca1102bb2f8a08601000000000016001404226a3d42aca1802ce0742a676a72963caa9f070247304402202b9651b7508f02fdfe5789bfe0001dd0ccd62aa4cd3fd1426bd0ff9ac787862b0220234d565d75f712fc1019068d7bc27ac1d0423b0a7ff73802353457032261e0e0012102094b5da4b68cb8b9699aa08d37f91bbdfa13ad88ba65ac33e20005a48ea42523a5041f00"}}
+
+
+    
