@@ -62,7 +62,7 @@ switch($_POST['act'] ?? '')
         $status['wallet'] = [
             'name' => $w->rpcwallet,
             'address' => $w->address,
-            'balance' => $btclib->getBalance($w),
+            'balance' => $btclib->getBalance($w, 1),
         ];
 
         break;
@@ -111,6 +111,7 @@ switch($_POST['act'] ?? '')
 
         $amount = floatval($_POST['amount'] ?? '0');
         $to = $_POST['to'] ?? '';
+        $feeIsIncluded = isset($_POST['fee_included']);
 
         if($amount == 0) {
             $status['error'] = "Cannot send 0 BTC";
@@ -122,7 +123,7 @@ switch($_POST['act'] ?? '')
             break;
         }
 
-        $txid = $btclib->createTransaction($w, $to, $amount, false);
+        $txid = $btclib->createTransaction($w, $to, $amount, $feeIsIncluded);
         $status['flash'] = "Transaction created: {$txid}";
         break;
 
@@ -292,7 +293,11 @@ if($reload) {
         </div>
         <div class="section">
             <label for="transfer_amount">Amount</label>
-            <input type="number" step="0.0001" id="transfer_amount" required name="amount" value="0.0001">
+            <input type="number" step="any" id="transfer_amount" required name="amount" value="0.0001">
+        </div>
+        <div class="section">
+            <label for="transfer_fee_included">Fee is Included</label>
+            <input type="checkbox" id="transfer_fee_included" name="fee_included">
         </div>
         <p>
             <button type="submit" name="act" value="transfer">
