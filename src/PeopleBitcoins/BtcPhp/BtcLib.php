@@ -152,6 +152,24 @@ class BtcLib implements IBtcLib
     /**
      * @inheritDoc
      */
+    public function loadWalletUnlocked(WalletInfo $wallet, int $passphraseUnlockTimeout = 60)
+    {
+        $this
+            ->createClient(null)
+            ->loadWallet($wallet->rpcwallet)
+            ->get();
+
+        if($wallet->passphrase) {
+            $this
+                ->createClient($wallet->rpcwallet)
+                ->walletPassphrase($wallet->passphrase, $passphraseUnlockTimeout)
+                ->get();
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function createTransaction(WalletInfo $from, string $to, float $amount, bool $feeIsInAmount, $targetConfirmations = IBtcLib::DEFAULT_CONFIRMATIONS, string $estimateMode = 'ECONOMICAL'): string
     {
         if($from->passphrase) {

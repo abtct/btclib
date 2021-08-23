@@ -53,6 +53,15 @@ interface IBtcLib
     public function getBalance(WalletInfo $wallet, $enoughConfirmations = self::DEFAULT_CONFIRMATIONS): float;
 
     /**
+     * Загрузить и разблокировать кошелек для дальнейших операций.
+     *
+     * @param WalletInfo $wallet            Доступ к кошельку
+     * @param int $passphraseUnlockTimeout  Время разблокировки
+     * @return void
+     */
+    public function loadWalletUnlocked(WalletInfo $wallet, int $passphraseUnlockTimeout = 60);
+
+    /**
      * Перевести средства с кошелька на ноде на любой другой кошелек.
      *
      * @param WalletInfo $from              Доступ к кошельку-донору

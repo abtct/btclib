@@ -59,6 +59,11 @@ switch($_POST['act'] ?? '')
             break;
         }
 
+        try {
+            $btclib->loadWalletUnlocked($w);
+        } catch (\Exception $ex) {
+        }
+
         $status['wallet'] = [
             'name' => $w->rpcwallet,
             'address' => $w->address,
